@@ -2,7 +2,6 @@ package collection
 
 import (
 	"bytes"
-	"fmt"
 	"sort"
 
 	"github.com/google/btree"
@@ -104,63 +103,4 @@ func (t *BTree) Get(k []byte) []byte {
 		return nil
 	}
 	return v.(BBytesItem)
-}
-
-func main() {
-	//	str := "abc"
-
-	{
-		var s SortedSlice
-		key := []byte("abc")
-		s.Add(key)
-		fmt.Println(string(s.Get(key)))
-
-		fmt.Println(s.bs)
-
-		k := []byte("123")
-		s.Add(k)
-		fmt.Println(string(s.Get(k)))
-
-		key = []byte("cdf")
-		fmt.Println(string(s.Get(key)))
-
-		s.Add(key)
-		fmt.Println(string(s.Get(key)))
-
-		fmt.Println("=====================")
-
-		fmt.Println(string(s.bs[0]))
-		fmt.Println(string(s.bs[1]))
-		fmt.Println(string(s.bs[2]))
-	}
-
-	fmt.Println("=====================")
-
-	{
-		t := NewLLRB()
-		key := []byte("abc")
-		t.Add(key)
-		fmt.Println(string(t.Get(key)))
-
-		key = []byte("cdf")
-		fmt.Println(string(t.Get(key)))
-
-		t.Add(key)
-		fmt.Println(string(t.Get(key)))
-	}
-
-	fmt.Println("=====================")
-
-	{
-		t := NewBTree(2)
-		key := []byte("abc")
-		t.Add(key)
-		fmt.Println(string(t.Get(key)))
-
-		key = []byte("cdf")
-		fmt.Println(string(t.Get(key)))
-
-		t.Add(key)
-		//		fmt.Println(string(t.Get(key)))
-	}
 }
