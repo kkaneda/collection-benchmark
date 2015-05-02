@@ -112,3 +112,17 @@ func BenchmarkBtree3Get(b *testing.B) {
 func BenchmarkBtree4Get(b *testing.B) {
 	benchmarkGet(b, NewBTree(4))
 }
+
+func BenchmarkBtree8Get(b *testing.B) {
+	benchmarkGet(b, NewBTree(8))
+}
+
+func BenchmarkBtree16Get(b *testing.B) {
+	benchmarkGet(b, NewBTree(16))
+}
+func BenchmarkBtree32Get(b *testing.B) {
+	benchmarkGet(b, NewBTree(32))
+}
+func BenchmarkBtree64Get(b *testing.B) {
+	benchmarkGet(b, NewBTree(64))
+}
