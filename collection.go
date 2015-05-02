@@ -12,6 +12,10 @@ import (
 type Collection interface {
 	Add([]byte)
 	Get([]byte) []byte
+	Delete([]byte) []byte
+	// Freeze is called when no further mutation will not
+	// happen. No-op except LazySortedSlice.
+	Freeze()
 }
 
 type BytesSlice [][]byte
@@ -49,6 +53,65 @@ func (s *SortedSlice) Get(k []byte) []byte {
 	return s.bs[n]
 }
 
+func (s *SortedSlice) Delete(k []byte) []byte {
+	n := sort.Search(len(s.bs), func(i int) bool {
+		return bytes.Compare(s.bs[i], k) >= 0
+	})
+	if n >= len(s.bs) || !bytes.Equal(s.bs[n], k) {
+		return nil
+	}
+	v := s.bs[n]
+	s.bs = append(s.bs[:n], s.bs[n+1:]...)
+	return v
+}
+
+func (s *SortedSlice) Freeze() {
+}
+
+// LazySortedSlice implements the Collection interface and
+// do sorting when requested.
+type LazySortedSlice struct {
+	bs     BytesSlice
+	frozen bool
+}
+
+func (s *LazySortedSlice) Add(v []byte) {
+	if s.frozen {
+		panic("No mutation is allowed")
+	}
+	s.bs = append(s.bs, v)
+}
+
+func (s *LazySortedSlice) Get(k []byte) []byte {
+	if !s.frozen {
+		panic("Not yet frozen")
+	}
+	n := sort.Search(len(s.bs), func(i int) bool {
+		return bytes.Compare(s.bs[i], k) >= 0
+	})
+	if n >= len(s.bs) || !bytes.Equal(s.bs[n], k) {
+		return nil
+	}
+	return s.bs[n]
+}
+
+func (s *LazySortedSlice) Delete(k []byte) []byte {
+	n := sort.Search(len(s.bs), func(i int) bool {
+		return bytes.Compare(s.bs[i], k) >= 0
+	})
+	if n >= len(s.bs) || !bytes.Equal(s.bs[n], k) {
+		return nil
+	}
+	v := s.bs[n]
+	s.bs = append(s.bs[:n], s.bs[n+1:]...)
+	return v
+}
+
+func (s *LazySortedSlice) Freeze() {
+	sort.Sort(s.bs)
+	s.frozen = true
+}
+
 // LLRB implements the Collection interface with llrb.LLRB.
 type LLRB struct {
 	lt *llrb.LLRB
@@ -77,6 +140,17 @@ func (t *LLRB) Get(k []byte) []byte {
 	return v.(LBytesItem)
 }
 
+func (t *LLRB) Delete(k []byte) []byte {
+	v := t.lt.Delete(LBytesItem(k))
+	if v == nil {
+		return nil
+	}
+	return v.(LBytesItem)
+}
+
+func (t *LLRB) Freeze() {
+}
+
 // BTree implements the Collection interface with btree.Btree.
 type BTree struct {
 	bt *btree.BTree
@@ -103,4 +177,15 @@ func (t *BTree) Get(k []byte) []byte {
 		return nil
 	}
 	return v.(BBytesItem)
+}
+
+func (t *BTree) Delete(k []byte) []byte {
+	v := t.bt.Delete(BBytesItem(k))
+	if v == nil {
+		return nil
+	}
+	return v.(BBytesItem)
+}
+
+func (t *BTree) Freeze() {
 }
