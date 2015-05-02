@@ -74,62 +74,41 @@ func TestSortedSliceRandomGet(t *testing.T) {
 	}
 }
 
-// benchmarkGet creates numElems elements and randomly look up the elements.
-func benchmarkGet(b *testing.B, c Collection, numElems int) {
-	for n := 0; n < b.N; n++ {
-		b.StopTimer()
-		keys := make([][]byte, numElems)
-		for i := 0; i < numElems; i++ {
-			key := newKey(fmt.Sprintf("a%d", rand.Int63()))
-			c.Add(key)
-			keys[i] = key
-		}
-
-		p := rand.Perm(len(keys))
-
-		b.StartTimer()
-		for i, _ := range keys {
-			key := keys[p[i]]
-			if !bytes.Equal(c.Get(key), key) {
-				b.Fatal("Not found: %v", key)
-			}
+// benchmarkGet creates b.N elements and randomly look up the elements.
+func benchmarkGet(b *testing.B, c Collection) {
+	b.StopTimer()
+	keys := make([][]byte, b.N)
+	for i := 0; i < b.N; i++ {
+		key := newKey(fmt.Sprintf("a%d", rand.Int63()))
+		c.Add(key)
+		keys[i] = key
+	}
+	p := rand.Perm(len(keys))
+	b.StartTimer()
+	for i, _ := range keys {
+		key := keys[p[i]]
+		if !bytes.Equal(c.Get(key), key) {
+			b.Fatal("Not found: %v", key)
 		}
 	}
 }
 
-//
 //func BenchmarkSortedSlice(b *testing.B) {
-//	benchmarkGet(b, &SortedSlice{}, 1 << 10)
+//	benchmarkGet(b, &SortedSlice{})
 //}
 
-func BenchmarkLLRBGet1K(b *testing.B) {
-	benchmarkGet(b, NewLLRB(), 1<<10)
+func BenchmarkLLRBGet(b *testing.B) {
+	benchmarkGet(b, NewLLRB())
 }
 
-func BenchmarkBtree2Get1K(b *testing.B) {
-	benchmarkGet(b, NewBTree(2), 1<<10)
+func BenchmarkBtree2Get(b *testing.B) {
+	benchmarkGet(b, NewBTree(2))
 }
 
-func BenchmarkBtree3Get1K(b *testing.B) {
-	benchmarkGet(b, NewBTree(3), 1<<10)
+func BenchmarkBtree3Get(b *testing.B) {
+	benchmarkGet(b, NewBTree(3))
 }
 
-func BenchmarkBtree4Get1K(b *testing.B) {
-	benchmarkGet(b, NewBTree(4), 1<<10)
-}
-
-func BenchmarkLLRBGet1M(b *testing.B) {
-	benchmarkGet(b, NewLLRB(), 1<<20)
-}
-
-func BenchmarkBtree2Get1M(b *testing.B) {
-	benchmarkGet(b, NewBTree(2), 1<<20)
-}
-
-func BenchmarkBtree3Get1M(b *testing.B) {
-	benchmarkGet(b, NewBTree(3), 1<<20)
-}
-
-func BenchmarkBtree4Get1M(b *testing.B) {
-	benchmarkGet(b, NewBTree(4), 1<<20)
+func BenchmarkBtree4Get(b *testing.B) {
+	benchmarkGet(b, NewBTree(4))
 }
