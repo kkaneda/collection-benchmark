@@ -39,8 +39,15 @@ type SortedSlice struct {
 }
 
 func (s *SortedSlice) Add(v []byte) {
-	s.bs = append(s.bs, v)
-	sort.Sort(s.bs)
+	//	s.bs = append(s.bs, v)
+	//	sort.Sort(s.bs)
+	n := sort.Search(len(s.bs), func(i int) bool {
+		return bytes.Compare(s.bs[i], v) >= 0
+	})
+	// Copied from https://github.com/golang/go/wiki/SliceTricks
+	s.bs = append(s.bs, nil)
+	copy(s.bs[n+1:], s.bs[n:])
+	s.bs[n] = v
 }
 
 func (s *SortedSlice) Get(k []byte) []byte {
@@ -61,7 +68,8 @@ func (s *SortedSlice) Delete(k []byte) []byte {
 		return nil
 	}
 	v := s.bs[n]
-	s.bs = append(s.bs[:n], s.bs[n+1:]...)
+	// Copied from https://github.com/golang/go/wiki/SliceTricks
+	s.bs[len(s.bs)-1], s.bs = nil, append(s.bs[:n], s.bs[n+1:]...)
 	return v
 }
 
