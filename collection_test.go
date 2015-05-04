@@ -147,13 +147,13 @@ func benchmarkGet(b *testing.B, c Collection) {
 	}
 }
 
-// Too slow
-//func BenchmarkGetSortedSlice(b *testing.B) {
-//	benchmarkGet(b, &SortedSlice{})
-//}
-func BenchmarkGetLazySortedSlice(b *testing.B) {
-	benchmarkGet(b, &LazySortedSlice{})
+func BenchmarkGetSortedSlice(b *testing.B) {
+	benchmarkGet(b, &SortedSlice{})
 }
+
+//func BenchmarkGetLazySortedSlice(b *testing.B) {
+//	benchmarkGet(b, &LazySortedSlice{})
+//}
 func BenchmarkGetLLRB(b *testing.B) {
 	benchmarkGet(b, NewLLRB())
 }
@@ -218,6 +218,7 @@ func benchmarkDelete(b *testing.B, c Collection) {
 		c.Add(key)
 		keys[i] = key
 	}
+	c.Freeze()
 	p := rand.Perm(len(keys))
 	b.StartTimer()
 	for i, _ := range keys {
@@ -232,6 +233,9 @@ func benchmarkDelete(b *testing.B, c Collection) {
 //func BenchmarkDeleteSortedSlice(b *testing.B) {
 //	benchmarkDelete(b, &SortedSlice{})
 //}
+func BenchmarkDeleteLazySortedSlice(b *testing.B) {
+	benchmarkDelete(b, &LazySortedSlice{})
+}
 func BenchmarkDeleteLLRB(b *testing.B) {
 	benchmarkDelete(b, NewLLRB())
 }
